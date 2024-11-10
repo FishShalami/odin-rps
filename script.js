@@ -1,11 +1,10 @@
 console.log("Hello! I want to play a game...")
 
+let humanScore = 0;
+let computerScore = 0;
 
-// get computer choice of options rock, paper or scissor
-    // make function with random nnumber generator that picks 1, 2, 3 
-    // assigns word choice to number
 
-let getComputerChoice = () => {
+let getCompChoice = () => {
     let tempNum = Math.ceil(Math.random() * 3);
     if (tempNum === 1) {
         compChoice = "Rock";
@@ -18,61 +17,85 @@ let getComputerChoice = () => {
     return compChoice
 }
 
-// console.log('The computer chose: ' + getComputerChoice());
 
-// get human choice of rock, paper, or scissor through function
+let playRound = (humanChoice) => {
+    //once a button is selected, run the computer choice function
+    const compChoice = getCompChoice();
 
-let getHumanChoice = () => {
-    huChoice = prompt("Choose either 'Rock', 'Paper', or 'Scissor'", "Rock");
-    huChoice = huChoice.charAt(0).toUpperCase() + huChoice.slice(1).toLowerCase();
-    return huChoice;
-}   
-
-// console.log('The human chose: ' + getHumanChoice())
-
-
-function playGame() {
-    //score tracking will keep tally of who has won
-    //Create two new variables named humanScore and computerScore in the global scope.
-
-    let humanScore = 0;
-    let computerScore = 0;
-
-    let humanSelection = getHumanChoice();
-    let computerSelection = getComputerChoice();
-    
-    //logic for single round of play
-    let playRound = (humanChoice, computerChoice) => {
+      // Log the human choice
+      console.log(`The human has selected: ${humanChoice}`);
       
-        //draw?
-        if (humanChoice === computerChoice) {
-            console.log('Draw! Play again!');
-        //Rock (1) beats scissor (3) => 13/31 -> combine the words
-        //Paper (2) beats rock (1) => 21/12
-        //Scissor (3) beats paper (2) => 32/23
-        } else if (humanChoice + computerChoice === 'RockScissor' || 
-            humanChoice + computerChoice === 'PaperRock' ||
-            humanChoice + computerChoice === 'ScissorRock')  {
-                humanScore = ++humanScore;
-                console.log(`You won! ${humanChoice} beats ${computerChoice}`);
-        } else {
-            computerScore = ++computerScore;
-            console.warn(`You lost! ${computerChoice} beats ${humanChoice}`);
-        }
-    
-        return humanScore;
-        return computerScore;
-    
-    }
-
-    for (let i = 0; i < 5; i++) {
-        playRound(humanSelection, computerSelection);
-        console.log(`The score is Human: ${humanScore} Computer: ${computerScore}`);
-        humanSelection = getHumanChoice();
-        computerSelection = getComputerChoice();
+    //draw?
+    if (humanChoice === compChoice) {
+        console.log('Draw! Play again!');
+        document.getElementById("result").textContent = `Draw! Both selected ${humanChoice}. Play again!`;
+    } else if (
+        (humanChoice === 'Rock' && compChoice === 'Scissor') ||
+        (humanChoice === 'Paper' && compChoice === 'Rock') ||
+        (humanChoice === 'Scissors' && compChoice === 'Paper')
+    ) {
+        //increment the score and counter if someone wins
+        humanScore++;
+        //only increment the round count if there is a winner
+        totalRounds++
+        console.log(`You won! ${humanChoice} beats ${compChoice}`);
+        document.getElementById("result").textContent = `You won! ${humanChoice} beats ${compChoice}`;
+    } else {
+        computerScore++;
+        totalRounds++
+        console.warn(`You lost! ${compChoice} beats ${humanChoice}`);
+        document.getElementById("result").textContent = `You lost! ${compChoice} beats ${humanChoice} `;
 
     }
-    
+
+    document.getElementById('score').textContent = `Human: ${humanScore} | Computer: ${computerScore}`;
 }
 
-playGame();
+const disableButtons = () => {
+    const buttons = document.querySelectorAll('.buttons button');
+    buttons.forEach(button => {
+        button.disabled = true;
+        button.style.cursor = 'not-allowed';
+        button.style.opacity = '0.6';
+    });
+};
+
+
+let totalRounds = computerScore + humanScore
+
+let getHumanChoice = (event) => {
+    // Check if the clicked element is a button
+    if (event.target.tagName === 'BUTTON') {
+        // Retrieve the ID of the clicked button
+        const humanChoice = event.target.textContent;
+        playRound(humanChoice);
+        //if the round count is less than 5, keep playing
+        if (totalRounds === 5) {
+            let winner = ''
+
+            if (computerScore > humanScore) {
+                winner = "Computer";
+            } else {
+                winner = "Human";
+            }
+            //show the winner
+            document.getElementById('winner').textContent = `The Winner is: ${winner}`;
+            console.log('Game over');
+
+            //reset the score counter
+            humanScore = 0;
+            computerScore = 0;
+
+            // Reset the totalRounds counter
+            totalRounds = 0;
+
+            // disable the buttons to prevent further play
+            disableButtons();
+
+        }
+    }
+};
+
+const buttons = document.querySelector('.buttons');
+
+buttons.addEventListener('click', getHumanChoice);
